@@ -39,3 +39,8 @@ all: test module.tar.gz
 
 setup:
 	go mod tidy
+
+test-as-root:
+	# need to be root to hit dmesg / kmsg
+	go test . -o test-binary -run JustBuildDontTest
+	sudo ./test-binary -test.v

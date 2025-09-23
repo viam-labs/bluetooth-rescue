@@ -24,20 +24,8 @@ func init() {
 }
 
 type Config struct {
-	/*
-		Put config attributes here. There should be public/exported fields
-		with a `json` parameter at the end of each attribute.
-
-		Example config struct:
-			type Config struct {
-				Pin   string `json:"pin"`
-				Board string `json:"board"`
-				MinDeg *float64 `json:"min_angle_deg,omitempty"`
-			}
-
-		If your model does not need a config, replace *Config in the init
-		function with resource.NoNativeConfig
-	*/
+	// when false, this logs hardware errors but doesn't try to fix them.
+	Rescue bool `json:"rescue"`
 }
 
 // Validate ensures all parts of the config are valid and important fields exist.

@@ -1,12 +1,13 @@
-# Module bluetooth-rescue 
+# bluetooth-rescue 
 
-Provide a description of the purpose of the module and any relevant information.
+The bluetooth system on the raspberry pi 4b intermittently fails while tethering. This module detects the failure and attempts to repair the system.
 
 ## Model viam:bluetooth-rescue:rescue
 
 Provide a description of the model and any relevant information.
 
 ### Configuration
+
 The following attribute template can be used to configure this model:
 
 ```json
