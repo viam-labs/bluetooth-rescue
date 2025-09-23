@@ -1,0 +1,13 @@
+{
+  "module_name": "bluetooth-rescue",
+  "namespace": "viam",
+  "language": "go",
+  "resource_type": "component",
+  "resource_subtype": "sensor",
+  "model_name": "rescue",
+  "enable_cloud_build": true,
+  "initialize_git": false,
+  "generator_version": "0.1.0",
+  "generated_on": "2025-09-23T20:58:01.116518919Z",
+  "module_readme_link": "README.md"
+}
