@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"go.viam.com/rdk/logging"
+	"go.viam.com/rdk/resource"
 )
 
 func TestDmesgReader(t *testing.T) {
@@ -16,7 +17,7 @@ func TestDmesgReader(t *testing.T) {
 	logger := logging.NewTestLogger(t)
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
-	ch := make(chan DmesgMesg)
+	ch := make(chan DmesgLine)
 
 	helloMsg := fmt.Sprintf("hello %s", time.Now().String())
 	kmsg, err := os.OpenFile("/dev/kmsg", os.O_RDWR, os.ModeAppend)
@@ -51,4 +52,16 @@ func TestDmesgReader(t *testing.T) {
 		t.Error(err)
 	}
 	wg.Wait()
+}
+
+func TestRescue(t *testing.T) {
+	logger := logging.NewTestLogger(t)
+	model, err := NewRescue(t.Context(), nil, resource.NewName(resource.NewAPI("", "", ""), ""), &Config{Rescue: true}, logger)
+	if err != nil {
+		t.Error(err)
+	}
+	rescue := model.(*rescuer)
+	if err := rescue.rescue(); err != nil {
+		t.Error(err)
+	}
 }

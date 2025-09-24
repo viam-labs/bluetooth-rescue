@@ -8,14 +8,15 @@ import (
 )
 
 // lightly parsed dmesg line
-type DmesgMesg struct {
+type DmesgLine struct {
 	Timestamp string
 	Message   string
 }
 
 var regexpDmesg = regexp.MustCompile(`^\[([\s\d\.]+)\] (.+)$`)
 
-func DmesgReader(ctx context.Context, ch chan DmesgMesg) error {
+// watches `dmesg --follow` and writes DmesgLine structs to `ch`
+func DmesgReader(ctx context.Context, ch chan DmesgLine) error {
 	cmd := exec.CommandContext(ctx, "dmesg", "--follow")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -31,7 +32,7 @@ func DmesgReader(ctx context.Context, ch chan DmesgMesg) error {
 			// todo: warn here, but exclude some normal ones first
 			continue
 		}
-		ch <- DmesgMesg{matches[1], matches[2]}
+		ch <- DmesgLine{matches[1], matches[2]}
 	}
 
 	return scanner.Err()
