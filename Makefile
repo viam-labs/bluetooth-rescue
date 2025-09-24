@@ -1,6 +1,6 @@
 
 GO_BUILD_ENV :=
-GO_BUILD_FLAGS :=
+GO_BUILD_FLAGS := -ldflags="-s -w"
 MODULE_BINARY := bin/bluetooth-rescue
 
 ifeq ($(VIAM_TARGET_OS), windows)
@@ -10,7 +10,7 @@ ifeq ($(VIAM_TARGET_OS), windows)
 endif
 
 $(MODULE_BINARY): Makefile go.mod *.go cmd/module/*.go 
-	$(GO_BUILD_ENV) go build $(GO_BUILD_FLAGS) -o $(MODULE_BINARY) cmd/module/main.go
+	$(GO_BUILD_ENV) go build $(GO_BUILD_FLAGS) -o $(MODULE_BINARY) ./cmd/module
 
 lint:
 	gofmt -s -w .
@@ -25,8 +25,6 @@ test:
 module.tar.gz: meta.json $(MODULE_BINARY)
 ifeq ($(VIAM_TARGET_OS), windows)
 	jq '.entrypoint = "./bin/bluetooth-rescue.exe"' meta.json > temp.json && mv temp.json meta.json
-else
-	strip $(MODULE_BINARY)
 endif
 	tar czf $@ meta.json $(MODULE_BINARY)
 ifeq ($(VIAM_TARGET_OS), windows)
