@@ -13,6 +13,7 @@ type DmesgLine struct {
 	Message   string
 }
 
+// parses a dmesg log line like `[123.456] msg msg msg`
 var regexpDmesg = regexp.MustCompile(`^\[([\s\d\.]+)\] (.+)$`)
 
 // watches `dmesg --follow` and writes DmesgLine structs to `ch`

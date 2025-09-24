@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"slices"
 	"time"
 
 	"github.com/Wifx/gonetworkmanager"
@@ -13,6 +14,7 @@ import (
 const hardwareErrorMsg = "Bluetooth: hci0: hardware error 0x00"
 const kernelModule = "hci_uart"
 
+// query NetworkManager, return a list of parsed connections
 func readConnections(nm gonetworkmanager.Settings) ([]*NMConnection, error) {
 	connections, err := nm.ListConnections()
 	if err != nil {
@@ -36,13 +38,13 @@ func readConnections(nm gonetworkmanager.Settings) ([]*NMConnection, error) {
 	return parsedCons, nil
 }
 
+// return first item in slice that has predicate(x)=true, else nil
 func getFirst[T any](items []*T, predicate func(*T) bool) *T {
-	for _, item := range items {
-		if predicate(item) {
-			return item
-		}
+	i := slices.IndexFunc(items, predicate)
+	if i == -1 {
+		return nil
 	}
-	return nil
+	return items[i]
 }
 
 // returns first connection from NetworkManager with type=bluetooth
@@ -102,12 +104,13 @@ func (s *rescuer) rescue() error {
 	return fmt.Errorf("failed after %d attempts to bring up connection %q", tries, con.Connection.ID)
 }
 
-// todo: we must have wrappers for this somewhere right
+// convenience type for NetworkManager maps
 type NMConnection struct {
 	Connection NMInnerConnection
 	raw        gonetworkmanager.Connection
 }
 
+// convenience type for NetworkManager maps
 type NMInnerConnection struct {
 	ID   string
 	Type string

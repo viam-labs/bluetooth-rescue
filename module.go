@@ -100,7 +100,6 @@ func newBluetoothRescueRescue(ctx context.Context, deps resource.Dependencies, r
 }
 
 func NewRescue(ctx context.Context, deps resource.Dependencies, name resource.Name, conf *Config, logger logging.Logger) (sensor.Sensor, error) {
-
 	cancelCtx, cancelFunc := context.WithCancel(context.Background())
 
 	s := &rescuer{
@@ -130,7 +129,7 @@ func (s *rescuer) DoCommand(ctx context.Context, cmd map[string]interface{}) (ma
 }
 
 func (s *rescuer) Close(context.Context) error {
-	// Put close code here
 	s.cancelFunc()
+	s.wg.Wait()
 	return nil
 }
