@@ -91,7 +91,7 @@ func RestartBluetooth(ctx context.Context, logger logging.Logger) error {
 
 	tries := 2
 	for i := range tries {
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Second * 5)
 
 		output, err := exec.CommandContext(ctx, "nmcli", "c", "up", con.Connection.ID).CombinedOutput()
 		if err == nil {
