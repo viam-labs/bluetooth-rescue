@@ -18,7 +18,6 @@
   "first_run": "",
   "build": {
     "build": "make module.tar.gz",
-    "setup": "make setup",
     "path": "bin/module.tar.gz",
     "arch": ["linux/arm64"]
   }

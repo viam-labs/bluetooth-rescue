@@ -52,6 +52,20 @@ type rescuer struct {
 	wg         sync.WaitGroup
 }
 
+func RescueRoutine(ctx context.Context, ch chan DmesgLine, logger logging.Logger, wg *sync.WaitGroup) {
+	for line := range ch {
+		if line.Message == hardwareErrorMsg {
+			logger.Warnf("dmesg tailer found hardware error at %s", line.Timestamp)
+			if err := RestartBluetooth(ctx, logger); err != nil {
+				logger.Errorf("rescue failed with %s", err)
+				// todo: think about retry strategy
+			}
+		}
+	}
+	// todo: we want to keep watching after rescuing
+	wg.Done()
+}
+
 func newBluetoothRescueRescue(ctx context.Context, deps resource.Dependencies, rawConf resource.Config, logger logging.Logger) (sensor.Sensor, error) {
 	conf, err := resource.NativeConfig[*Config](rawConf)
 	if err != nil {
@@ -82,19 +96,14 @@ func newBluetoothRescueRescue(ctx context.Context, deps resource.Dependencies, r
 
 	// start rescuer routine
 	// todo: reconfigure won't start/stop this; how to make that clear to the user?
-	rescuer.wg.Add(1)
-	utils.PanicCapturingGo(func() {
-		for line := range ch {
-			if line.Message == hardwareErrorMsg {
-				rescuer.logger.Warnf("dmesg tailer found hardware error at %s", line.Timestamp)
-				if err := rescuer.rescue(); err != nil {
-					rescuer.logger.Errorf("rescue failed with %s", err)
-					// todo: think about retry strategy
-				}
-			}
-		}
-		rescuer.wg.Done()
-	})
+	if !rescuer.cfg.Rescue {
+		rescuer.logger.Info("not rescuing because rescue=false in config")
+	} else {
+		rescuer.wg.Add(1)
+		utils.PanicCapturingGo(func() {
+			RescueRoutine(rescuer.cancelCtx, ch, rescuer.logger, &rescuer.wg)
+		})
+	}
 
 	return model, nil
 }

@@ -2,6 +2,7 @@ package bluetoothrescue
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os/exec"
 	"slices"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/Wifx/gonetworkmanager"
 	"github.com/go-viper/mapstructure/v2"
+	"go.viam.com/rdk/logging"
 )
 
 const hardwareErrorMsg = "Bluetooth: hci0: hardware error 0x00"
@@ -62,11 +64,7 @@ func getBTConnection(nm gonetworkmanager.Settings) (*NMConnection, error) {
 }
 
 // make sure bluetooth is in a bad state + that it should be enabled, then fix it
-func (s *rescuer) rescue() error {
-	if !s.cfg.Rescue {
-		s.logger.Info("not rescuing because rescue=false in config")
-		return nil
-	}
+func RestartBluetooth(ctx context.Context, logger logging.Logger) error {
 	nmSettings, err := gonetworkmanager.NewSettings()
 	if err != nil {
 		return err
@@ -75,31 +73,32 @@ func (s *rescuer) rescue() error {
 	if err != nil {
 		return err
 	}
-	s.logger.Infof("rescuing connection %q: %+v", con.Connection.ID, con)
+	logger.Infof("rescuing connection %q: %+v", con.Connection.ID, con)
 
-	output, err := exec.CommandContext(s.cancelCtx, "rmmod", kernelModule).CombinedOutput()
+	output, err := exec.CommandContext(ctx, "rmmod", kernelModule).CombinedOutput()
 	if err != nil {
 		if bytes.Contains(output, []byte("not currently loaded")) {
-			s.logger.Debugf("ignoring 'not loaded' error %q", string(output))
+			logger.Debugf("ignoring 'not loaded' error %q", string(output))
 		} else {
 			return fmt.Errorf("rmmod failed, error %q output %q", err, string(output))
 		}
 	}
-	output, err = exec.CommandContext(s.cancelCtx, "modprobe", kernelModule).CombinedOutput()
+	output, err = exec.CommandContext(ctx, "modprobe", kernelModule).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("modprobe failed, error %q output %q", err, string(output))
 	}
+	logger.Info("restarted kernel module")
 
 	tries := 2
 	for i := range tries {
 		time.Sleep(time.Second * 3)
 
-		output, err := exec.CommandContext(s.cancelCtx, "nmcli", "c", "up", con.Connection.ID).CombinedOutput()
+		output, err := exec.CommandContext(ctx, "nmcli", "c", "up", con.Connection.ID).CombinedOutput()
 		if err == nil {
-			s.logger.Infof("successfully brought up connection %q", con.Connection.ID)
+			logger.Infof("successfully brought up connection %q", con.Connection.ID)
 			return nil
 		}
-		s.logger.Warnf("failed attempt %d/%d to bring up connection %q: %q", i+1, tries, con.Connection.ID, string(output))
+		logger.Warnf("failed attempt %d/%d to bring up connection %q: %q", i+1, tries, con.Connection.ID, string(output))
 	}
 	return fmt.Errorf("failed after %d attempts to bring up connection %q", tries, con.Connection.ID)
 }
