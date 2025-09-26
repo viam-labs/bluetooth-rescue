@@ -3,6 +3,8 @@ package bluetoothrescue
 import (
 	"context"
 	"errors"
+	"os"
+	"strconv"
 	"sync"
 
 	"go.viam.com/rdk/components/sensor"
@@ -52,17 +54,35 @@ type rescuer struct {
 	wg         sync.WaitGroup
 }
 
+// return current value of /proc/uptime
+func uptime() float64 {
+	val, err := os.ReadFile("/proc/uptime")
+	if err != nil {
+		return -1
+	}
+	parsed, err := strconv.ParseFloat(val)
+	if err != nil {
+		return -1
+	}
+	return parsed
+}
+
+// consume lines from `ch`, call RestartBluetooth if you encounter an error
 func RescueRoutine(ctx context.Context, ch chan DmesgLine, logger logging.Logger, wg *sync.WaitGroup) {
 	for line := range ch {
 		if line.Message == hardwareErrorMsg {
 			logger.Warnf("dmesg tailer found hardware error at %s", line.Timestamp)
+			curUptime := uptime()
+			if offset, err := strconv.ParseFloat(); err != nil && curUptime-offset > 10 {
+				logger.Warnf("dmesg line is %f seconds old", curUptime-offset)
+			}
 			if err := RestartBluetooth(ctx, logger); err != nil {
 				logger.Errorf("rescue failed with %s", err)
 				// todo: think about retry strategy
 			}
 		}
 	}
-	// todo: we want to keep watching after rescuing
+	// todo: outer loop that keeps going until channel is closed
 	wg.Done()
 }
 
@@ -138,6 +158,7 @@ func (s *rescuer) DoCommand(ctx context.Context, cmd map[string]interface{}) (ma
 }
 
 func (s *rescuer) Close(context.Context) error {
+	// todo: this doesn't shut down promptly. debug cancels + waits.
 	s.cancelFunc()
 	s.wg.Wait()
 	return nil

@@ -73,7 +73,8 @@ func RestartBluetooth(ctx context.Context, logger logging.Logger) error {
 	if err != nil {
 		return err
 	}
-	logger.Infof("rescuing connection %q: %+v", con.Connection.ID, con)
+	logger.Infof("found NetworkManager connection %q: %+v", con.Connection.ID, con)
+	// todo: bail if the connection is online
 
 	output, err := exec.CommandContext(ctx, "rmmod", kernelModule).CombinedOutput()
 	if err != nil {
