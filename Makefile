@@ -14,7 +14,7 @@ $(MODULE_BINARY): Makefile go.mod *.go cmd/module/*.go
 	upx $@
 
 lint:
-	gofmt -s -w .
+	go vet ./...
 
 update:
 	go get go.viam.com/rdk@latest

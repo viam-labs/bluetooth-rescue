@@ -60,7 +60,7 @@ func uptime() float64 {
 	if err != nil {
 		return -1
 	}
-	parsed, err := strconv.ParseFloat(val)
+	parsed, err := strconv.ParseFloat(string(val), 64)
 	if err != nil {
 		return -1
 	}
@@ -73,7 +73,7 @@ func RescueRoutine(ctx context.Context, ch chan DmesgLine, logger logging.Logger
 		if line.Message == hardwareErrorMsg {
 			logger.Warnf("dmesg tailer found hardware error at %s", line.Timestamp)
 			curUptime := uptime()
-			if offset, err := strconv.ParseFloat(); err != nil && curUptime-offset > 10 {
+			if offset, err := strconv.ParseFloat(line.Timestamp, 64); err != nil && curUptime-offset > 10 {
 				logger.Warnf("dmesg line is %f seconds old", curUptime-offset)
 			}
 			if err := RestartBluetooth(ctx, logger); err != nil {
