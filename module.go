@@ -153,7 +153,6 @@ func (s *rescuer) DoCommand(ctx context.Context, cmd map[string]interface{}) (ma
 }
 
 func (s *rescuer) Close(context.Context) error {
-	// todo: this doesn't shut down promptly. debug cancels + waits.
 	s.cancelFunc()
 	s.wg.Wait()
 	return nil
