@@ -4,8 +4,6 @@ import (
 	"bluetoothrescue"
 	"context"
 	"flag"
-	"fmt"
-	"runtime/debug"
 	"sync"
 
 	"go.viam.com/rdk/components/sensor"
@@ -54,11 +52,6 @@ func testMode(mode string) {
 }
 
 func main() {
-	info, ok := debug.ReadBuildInfo()
-	if ok {
-		// todo: move this print to ModularMain
-		fmt.Printf("version: %s, checksum: %s, go version: %s\n", info.Main.Version, info.Main.Sum, info.GoVersion)
-	}
 	flag.Parse()
 	if *mode != "" {
 		testMode(*mode)

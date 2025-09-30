@@ -22,6 +22,22 @@ func readConnections(nm gonetworkmanager.Settings) ([]*NMConnection, error) {
 	if err != nil {
 		return nil, err
 	}
+	mgr, err := gonetworkmanager.NewNetworkManager()
+	if err != nil {
+		return nil, err
+	}
+	actives, err := mgr.GetPropertyActiveConnections()
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]string, 0, len(actives))
+	for _, active := range actives {
+		id, err := active.GetPropertyUUID()
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
 
 	parsedCons := make([]*NMConnection, 0, len(connections))
 
@@ -30,11 +46,15 @@ func readConnections(nm gonetworkmanager.Settings) ([]*NMConnection, error) {
 		if err != nil {
 			return nil, err
 		}
-		parsed := &NMConnection{raw: con}
+		parsed := &NMConnection{}
 		err = mapstructure.Decode(settings, parsed)
 		if err != nil {
 			return nil, err
 		}
+		parsed.raw = con
+		parsed.active = slices.ContainsFunc(ids, func(id string) bool {
+			return id == parsed.Connection.UUID
+		})
 		parsedCons = append(parsedCons, parsed)
 	}
 	return parsedCons, nil
@@ -74,7 +94,10 @@ func RestartBluetooth(ctx context.Context, logger logging.Logger) error {
 		return err
 	}
 	logger.Infof("found NetworkManager connection %q: %+v", con.Connection.ID, con)
-	// todo: bail if the connection is online
+	if con.active {
+		logger.Warn("not rescuing connection because NetworkManager considers it active")
+		return nil
+	}
 
 	output, err := exec.CommandContext(ctx, "rmmod", kernelModule).CombinedOutput()
 	if err != nil {
@@ -107,6 +130,7 @@ func RestartBluetooth(ctx context.Context, logger logging.Logger) error {
 // convenience type for NetworkManager maps
 type NMConnection struct {
 	Connection NMInnerConnection
+	active     bool
 	raw        gonetworkmanager.Connection
 }
 
