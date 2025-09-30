@@ -30,7 +30,7 @@ func DmesgReader(ctx context.Context, ch chan DmesgLine) error {
 	for scanner.Scan() {
 		matches := regexpDmesg.FindStringSubmatch(scanner.Text())
 		if matches == nil {
-			// todo: warn here, but exclude some normal ones first
+			// todo: warn here, but exclude some normal unparseable lines first
 			continue
 		}
 		ch <- DmesgLine{matches[1], matches[2]}

@@ -78,11 +78,11 @@ func RescueRoutine(ctx context.Context, ch chan DmesgLine, logger logging.Logger
 			}
 			if err := RestartBluetooth(ctx, logger); err != nil {
 				logger.Errorf("rescue failed with %s", err)
-				// todo: think about retry strategy
+				// todo: backoffs
+				// todo: think about case where bt was rescued but NetworkManager can't bring up PAN; agent will finish the rescue?
 			}
 		}
 	}
-	// todo: outer loop that keeps going until channel is closed
 	wg.Done()
 }
 
@@ -97,11 +97,6 @@ func newBluetoothRescueRescue(ctx context.Context, deps resource.Dependencies, r
 	}
 	rescuer := model.(*rescuer)
 
-	// todo: how to make this not double-repair if restarted?
-	// - make sure bluetooth is broken before repairing
-	// todo: how to make this not flap / fight when someone disables bluetooth (i.e. maybe it should be off)
-
-	// todo: callback and restart these
 	ch := make(chan DmesgLine)
 
 	// start reader routine
