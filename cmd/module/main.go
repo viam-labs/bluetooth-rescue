@@ -57,5 +57,5 @@ func main() {
 		testMode(*mode)
 		return
 	}
-	module.ModularMain(resource.APIModel{sensor.API, bluetoothrescue.Rescue})
+	module.ModularMain(resource.APIModel{API: sensor.API, Model: bluetoothrescue.Rescue})
 }

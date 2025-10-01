@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"go.viam.com/rdk/logging"
-	"go.viam.com/rdk/resource"
 )
 
 func TestDmesgReader(t *testing.T) {
@@ -54,14 +53,8 @@ func TestDmesgReader(t *testing.T) {
 	wg.Wait()
 }
 
-func TestRescue(t *testing.T) {
-	logger := logging.NewTestLogger(t)
-	model, err := NewRescue(t.Context(), nil, resource.NewName(resource.NewAPI("", "", ""), ""), &Config{Rescue: true}, logger)
-	if err != nil {
-		t.Error(err)
-	}
-	rescue := model.(*rescuer)
-	if err := rescue.rescue(); err != nil {
+func TestRestartBluetooth(t *testing.T) {
+	if err := RestartBluetooth(t.Context(), logging.NewTestLogger(t)); err != nil {
 		t.Error(err)
 	}
 }

@@ -18,6 +18,7 @@ var regexpDmesg = regexp.MustCompile(`^\[([\s\d\.]+)\] (.+)$`)
 
 // watches `dmesg --follow` and writes DmesgLine structs to `ch`
 func DmesgReader(ctx context.Context, ch chan DmesgLine) error {
+	// todo: tail journalctl instead of dmesg
 	cmd := exec.CommandContext(ctx, "dmesg", "--follow")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

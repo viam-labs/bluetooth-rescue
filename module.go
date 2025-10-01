@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/go-viper/mapstructure/v2"
 	"go.viam.com/rdk/components/sensor"
 	"go.viam.com/rdk/logging"
 	"go.viam.com/rdk/resource"
@@ -70,6 +71,7 @@ func uptime() float64 {
 // consume lines from `ch`, call RestartBluetooth if you encounter an error
 func RescueRoutine(ctx context.Context, ch chan DmesgLine, logger logging.Logger, wg *sync.WaitGroup) {
 	for line := range ch {
+		// todo: make error pattern configurable
 		if line.Message == hardwareErrorMsg {
 			logger.Warnf("dmesg tailer found hardware error at %s", line.Timestamp)
 			curUptime := uptime()
@@ -145,11 +147,30 @@ func (s *rescuer) NewClientFromConn(ctx context.Context, conn rpc.ClientConn, re
 }
 
 func (s *rescuer) Readings(ctx context.Context, extra map[string]interface{}) (map[string]interface{}, error) {
+	// todo: return the connections table with current status
 	panic("not implemented")
 }
 
+type command struct {
+	action string
+	args   []string
+}
+
 func (s *rescuer) DoCommand(ctx context.Context, cmd map[string]interface{}) (map[string]interface{}, error) {
-	panic("not implemented")
+	parsed := command{}
+	if err := mapstructure.Decode(cmd, &parsed); err != nil {
+		return nil, err
+	}
+	switch parsed.action {
+	case "rescue":
+		if err := RestartBluetooth(ctx, s.logger); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, errors.New("expected {action: rescue}")
+	}
+	return map[string]any{"ok": true}, nil
+
 }
 
 func (s *rescuer) Close(context.Context) error {
