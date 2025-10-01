@@ -147,12 +147,12 @@ func (s *rescuer) Name() resource.Name {
 }
 
 func (s *rescuer) NewClientFromConn(ctx context.Context, conn rpc.ClientConn, remoteName string, name resource.Name, logger logging.Logger) (sensor.Sensor, error) {
-	panic("not implemented")
+	return nil, errUnimplemented
 }
 
 func (s *rescuer) Readings(ctx context.Context, extra map[string]interface{}) (map[string]interface{}, error) {
 	// todo: return the connections table with current status
-	panic("not implemented")
+	return nil, errUnimplemented
 }
 
 type command struct {

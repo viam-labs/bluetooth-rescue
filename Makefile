@@ -11,8 +11,6 @@ endif
 
 $(MODULE_BINARY): Makefile go.mod *.go cmd/module/*.go 
 	$(GO_BUILD_ENV) go build $(GO_BUILD_FLAGS) -o $@ ./cmd/module
-	# we compress because this module is likely to be used on systems with bad connectivity
-	upx $@
 
 lint:
 	go vet ./...
