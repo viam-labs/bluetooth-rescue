@@ -53,6 +53,7 @@ type rescuer struct {
 	cancelCtx  context.Context
 	cancelFunc func()
 	wg         sync.WaitGroup
+	channel    chan DmesgLine
 }
 
 // return current value of /proc/uptime
@@ -86,6 +87,7 @@ func RescueRoutine(ctx context.Context, ch chan DmesgLine, logger logging.Logger
 		}
 	}
 	wg.Done()
+	logger.Debug("rescue loop done")
 }
 
 func newBluetoothRescueRescue(ctx context.Context, deps resource.Dependencies, rawConf resource.Config, logger logging.Logger) (sensor.Sensor, error) {
@@ -100,6 +102,7 @@ func newBluetoothRescueRescue(ctx context.Context, deps resource.Dependencies, r
 	rescuer := model.(*rescuer)
 
 	ch := make(chan DmesgLine)
+	rescuer.channel = ch
 
 	// start reader routine
 	rescuer.wg.Add(1)
@@ -109,6 +112,7 @@ func newBluetoothRescueRescue(ctx context.Context, deps resource.Dependencies, r
 			logger.Errorf("DmesgReader failed with %s", err)
 		}
 		rescuer.wg.Done()
+		logger.Debug("tailer loop done")
 	})
 
 	// start rescuer routine
@@ -175,6 +179,7 @@ func (s *rescuer) DoCommand(ctx context.Context, cmd map[string]interface{}) (ma
 
 func (s *rescuer) Close(context.Context) error {
 	s.cancelFunc()
+	close(s.channel)
 	s.wg.Wait()
 	return nil
 }
