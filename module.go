@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	Rescue           = resource.NewModel("viam", "bluetooth-rescue", "rescue")
+	Rescue           = resource.NewModel("viam-labs", "bluetooth-rescue", "rescue")
 	errUnimplemented = errors.New("unimplemented")
 )
 

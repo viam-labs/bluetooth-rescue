@@ -1,13 +1,13 @@
 {
   "$schema": "https://dl.viam.dev/module.schema.json",
-  "module_id": "viam:bluetooth-rescue",
+  "module_id": "viam-labs:bluetooth-rescue",
   "visibility": "public",
   "url": "https://github.com/viam-labs/bluetooth-rescue",
   "description": "Detect bluetooth hci_uart errors on the pi 4 and automatically recover",
   "models": [
     {
       "api": "rdk:component:sensor",
-      "model": "viam:bluetooth-rescue:rescue",
+      "model": "viam-labs:bluetooth-rescue:rescue",
       "description": "Detect and fix pi 4 bluetooth failures",
       "markdown_link": "README.md#model-viambluetooth-rescuerescue"
     }
