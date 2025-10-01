@@ -1,10 +1,10 @@
 # bluetooth-rescue 
 
-The bluetooth system on the raspberry pi 4b intermittently fails while tethering. This module detects the failure and attempts to repair the system.
+The bluetooth system on the raspberry pi 4b intermittently fails while tethering. This module detects the failure and attempts to repair the system by restarting the relevant bits.
 
 ## Model viam:bluetooth-rescue:rescue
 
-Provide a description of the model and any relevant information.
+Detect and optionally repair bluetooth crashes.
 
 ### Configuration
 
@@ -12,8 +12,7 @@ The following attribute template can be used to configure this model:
 
 ```json
 {
-"attribute_1": <float>,
-"attribute_2": <string>
+  "rescue": <bool>
 }
 ```
 
@@ -23,29 +22,22 @@ The following attributes are available for this model:
 
 | Name          | Type   | Inclusion | Description                |
 |---------------|--------|-----------|----------------------------|
-| `attribute_1` | float  | Required  | Description of attribute 1 |
-| `attribute_2` | string | Optional  | Description of attribute 2 |
+| `rescue` | bool   | Optional  | If true, the module will rescue bluetooth by restarting it, instead of just logging errors |
 
 #### Example Configuration
 
 ```json
 {
-  "attribute_1": 1.0,
-  "attribute_2": "foo"
+  "rescue": true
 }
 ```
 
 ### DoCommand
 
-If your model implements DoCommand, provide an example payload of each command that is supported and the arguments that can be used. If your model does not implement DoCommand, remove this section.
-
 #### Example DoCommand
 
 ```json
 {
-  "command_name": {
-    "arg1": "foo",
-    "arg2": 1
-  }
+  "action": "rescue"
 }
 ```
