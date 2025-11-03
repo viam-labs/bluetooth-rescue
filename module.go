@@ -77,6 +77,8 @@ func RescueRoutine(ctx context.Context, ch chan DmesgLine, logger logging.Logger
 			logger.Warnf("dmesg tailer found hardware error at %s", line.Timestamp)
 			curUptime := uptime()
 			if offset, err := strconv.ParseFloat(line.Timestamp, 64); err != nil && curUptime-offset > 10 {
+				// note: dmesg timestamps and uptime are not perfectly aligned; we can't reliably use this
+				// to detect stale errors.
 				logger.Warnf("dmesg line is %f seconds old", curUptime-offset)
 			}
 			if err := RestartBluetooth(ctx, logger); err != nil {
