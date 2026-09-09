@@ -179,6 +179,10 @@ func (s *rescuer) DoCommand(ctx context.Context, cmd map[string]interface{}) (ma
 
 }
 
+func (s *rescuer) Status(ctx context.Context) (map[string]interface{}, error) {
+	return map[string]interface{}{}, nil
+}
+
 func (s *rescuer) Close(context.Context) error {
 	s.cancelFunc()
 	close(s.channel)
