@@ -36,16 +36,19 @@ func testMode(mode string) {
 		})
 	}
 
-	if mode == "wait-rescue" {
+	switch mode {
+	case "wait-rescue":
 		// start rescuer routine
 		logger.Info("starting RescueRoutine")
 		wg.Add(1)
 		utils.PanicCapturingGo(func() {
 			bluetoothrescue.RescueRoutine(ctx, ch, logger, &wg)
 		})
-	} else if mode == "rescue" {
+	case "rescue":
 		logger.Info("rescuing immediately")
-		bluetoothrescue.RestartBluetooth(ctx, logger)
+		if err := bluetoothrescue.RestartBluetooth(ctx, logger); err != nil {
+			logger.Errorf("RestartBluetooth failed with %s", err)
+		}
 	}
 	logger.Info("waiting for background tasks")
 	wg.Wait()
