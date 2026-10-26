@@ -23,7 +23,7 @@ func TestDmesgReader(t *testing.T) {
 	if err != nil {
 		t.Errorf("can't open kmsg")
 	}
-	defer kmsg.Close()
+	defer func() { _ = kmsg.Close() }()
 	// without the newline this won't appear in dmesg right away
 	_, err = kmsg.WriteString(helloMsg + "\n")
 	if err != nil {
