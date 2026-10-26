@@ -159,7 +159,6 @@ func (s *rescuer) Readings(ctx context.Context, extra map[string]interface{}) (m
 
 type command struct {
 	action string
-	args   []string
 }
 
 func (s *rescuer) DoCommand(ctx context.Context, cmd map[string]interface{}) (map[string]interface{}, error) {
