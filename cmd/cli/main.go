@@ -1,11 +1,11 @@
 package main
 
 import (
-	"context"
 	"bluetoothrescue"
+	"context"
+	"go.viam.com/rdk/components/sensor"
 	"go.viam.com/rdk/logging"
 	"go.viam.com/rdk/resource"
-	"go.viam.com/rdk/components/sensor"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func realMain() error {
 	if err != nil {
 		return err
 	}
-	defer thing.Close(ctx)
+	defer func() { _ = thing.Close(ctx) }()
 
 	return nil
 }
